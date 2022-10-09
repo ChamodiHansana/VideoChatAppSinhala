@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
 from pathlib import Path
-#import django_heroku
+import django_heroku
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,8 +27,8 @@ SECRET_KEY = 'django-insecure-cly%(5-34f8d1pc_fi*l_p@m3^x%#a$!iq(yu=s&&ez%-_pk$3
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
-#ALLOWED_HOSTS = ["fthfthfthfhtfh.herokuapp.com", "127.0.0.1"]
+#ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ["sinhalasideo98.herokuapp.com", "127.0.0.1"]
 
 # Application definition
 
@@ -132,7 +132,7 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 #import django_heroku
-#django_heroku.settings(locals())
+django_heroku.settings(locals())
 
 #django_heroku.settings(locals())
 

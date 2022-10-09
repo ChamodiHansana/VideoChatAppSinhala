@@ -94,7 +94,9 @@ let joinAndDisplayLocalStreamForNonDeaf = async() => {
 
     let player = `<div  class="video-container" id="user-container-${UID}">
                              <div class="video-player" id="user-${UID}"></div>
-                             <div class="username-wrapper"><span class="user-name">${member.name}</span> : Enabled Non Deaf mode</div>
+                             <div class="username-wrapper"><span class="user-name">${member.name}[Enabled Non Deaf mode]:<div class="words" contenteditable>
+                             <p id="p"></p>
+                          </div></span> </div>
                           </div>`
 
     document.getElementById('video-streams').insertAdjacentHTML('beforeend', player)
@@ -108,7 +110,7 @@ let joinAndDisplayLocalStreamForNonDeaf = async() => {
 
     const recognition = new SpeechRecognition();
     recognition.interimResults = true;
-    recognition.lang = 'en-US';
+    recognition.lang = 'si-LK';
     const words = document.querySelector('.words');
     words.appendChild(p);
 
@@ -162,7 +164,29 @@ let handleUserJoined = async(user, mediaType) => {
 
         let member = await getMember(user)
         let user_type = member.type
-        console.log(user_type)
+
+        //get real time subtitle without refreshing page
+
+        //setInterval(async function() {
+        //let sub = await getTranscript(user)
+        // console.log(sub)
+        //}, 500);
+
+
+        setInterval(function() {
+            var data = {};
+            $.ajax({
+                url: `/get_sub/?UID=${user.uid}&room_name=${CHANNEL}`,
+                type: 'GET',
+                data: data,
+                dataType: 'json',
+                success: function(resp) {
+                    console.log(resp)
+                        //$('#result').html(resp);
+                    $("#result").html(resp.transcript);
+                }
+            });
+        }, 500);
 
         player = `<div  class="video-container" id="user-container-${user.uid}">
             <div class="video-player" id="user-${user.uid}"></div>
@@ -171,19 +195,22 @@ let handleUserJoined = async(user, mediaType) => {
 
         playerForDeaf = `<div  class="video-container" id="user-container-${user.uid}">
         <div class="video-player" id="user-${user.uid}"></div>
-        <div class="username-wrapper"><span class="user-name">${member.name}</span>:Deaf person</div>
+        <div class="username-wrapper"><span class="user-name">${member.name}</span>:[Deaf] </div>
         </div>`
 
         playerForNonDeaf = `<div  class="video-container" id="user-container-${user.uid}">
-        <div class="video-player" id="user-${user.uid}"></div>
-        <div class="username-wrapper"><span class="user-name">${member.name}</span>:Non deaf person</div>
-        <div style=" position: absolute;top: 440px; left: 110px; z-index: 9999;background-color: rgba(255, 0, 0, 0.3);width: fit-content;padding: 10px;border-radius: 5px;color: #fff;font-size: 14px;"> ${member.transcript} </div>
-        </div>`
+            <div class="video-player" id="user-${user.uid}"></div>
+            <div class="username-wrapper"><span class="user-name">${member.name}</span>:[Non deaf]<div id="result"></div></div>
+            </div>`
+
+
 
         if (user_type === 'deaf') {
             document.getElementById('video-streams').insertAdjacentHTML('beforeend', playerForDeaf)
         } else if (user_type === 'nDeaf') {
+
             document.getElementById('video-streams').insertAdjacentHTML('beforeend', playerForNonDeaf)
+
         } else {
             document.getElementById('video-streams').insertAdjacentHTML('beforeend', player)
         }
@@ -194,29 +221,6 @@ let handleUserJoined = async(user, mediaType) => {
         user.audioTrack.play()
     }
 
-    var speech = true;
-    window.SpeechRecognition = window.SpeechRecognition ||
-        window.webkitSpeechRecognition;
-
-    const recognition = new SpeechRecognition();
-    recognition.interimResults = true;
-    const words = document.querySelector('.words');
-    words.appendChild(p);
-
-    recognition.addEventListener('result', e => {
-        const transcript = Array.from(e.results)
-            .map(result => result[0])
-            .map(result => result.transcript)
-            .join('')
-
-        document.getElementById("p").innerHTML = transcript;
-        console.log(transcript);
-    });
-
-    if (speech == true) {
-        recognition.start();
-        recognition.addEventListener('end', recognition.start);
-    }
 
 }
 
@@ -277,6 +281,8 @@ let getMember = async(user) => {
     return member
 }
 
+
+
 let deleteMember = async() => {
     let response = await fetch('/delete_member/', {
         method: 'POST',
@@ -288,23 +294,11 @@ let deleteMember = async() => {
     let member = await response.json()
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-let binaryToBase64 = async(audioFile) => {
-
-    var decodedImageData = btoa(audioFile); // the actual conversion of data from binary to base64 format
-    return decodedImageData
-
+let getTranscript = async(user) => {
+    let response = await fetch(`/get_sub/?UID=${user.uid}&room_name=${CHANNEL}`)
+    let member = await response.json()
+    let memberSub = member.transcript
+    return memberSub
 }
 
 
@@ -317,20 +311,7 @@ let speechToText = async(convertedAudio) => {
         body: JSON.stringify({ 'mydata': convertedAudio })
     })
 
-
-    //let subtitle = await response.json()
-    //return subtitle
 }
-
-
-
-
-
-
-
-
-
-
 
 window.addEventListener("beforeunload", deleteMember);
 

@@ -1,14 +1,13 @@
 
 from django.shortcuts import render
-from django.http import  JsonResponse
+from django.http import  HttpResponse, JsonResponse
 import random
 import time
 from agora_token_builder import RtcTokenBuilder
 from .models import RoomMember
 import json
 from django.views.decorators.csrf import csrf_exempt
-import speech_recognition as sr
-import speech_recognition as sr
+
 
 
 # Create your views here.
@@ -89,5 +88,26 @@ def speechToText(request):
     member.save()
     return JsonResponse('Subtitle Updated', safe=False)
    
+@csrf_exempt
+def getSubtitle(request):
 
- 
+    # you can change the request method in the following condition.
+    # I dont know what you're dealing with.
+    if request.is_ajax() and request.method == 'GET':
+        # main logic here setting the value of resp_data
+        uid = request.GET.get('UID')
+        room_name = request.GET.get('room_name')
+    #type= request.GET.get('type')
+        member = RoomMember.objects.get(
+           uid=uid,
+           room_name=room_name,
+        # type=type
+        )
+        resp_data = {
+            'transcript': member.transcript,
+            # more data
+        }
+
+        #return JsonResponse(resp_data, status=200)
+        return JsonResponse(resp_data, safe=False)
+    #return HttpResponse("{'data':.''}", content_type="text/event-stream")

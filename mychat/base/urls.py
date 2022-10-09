@@ -10,6 +10,8 @@ urlpatterns = [
     path('get_member/', views.getMember),
     path('delete_member/', views.deleteMember),
     path('speech_to_text/', views.speechToText),
+    path('get_sub/', views.getSubtitle),
+    
     
     
 ]
